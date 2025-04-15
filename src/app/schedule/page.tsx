@@ -1,25 +1,26 @@
-import { getLocations } from "@/lib/notion/locations";
-import LocationMap from "@/components/LocationMap";
+import { getEvents } from "@/lib/notion/events";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EventCalendar from "@/components/EventCalendar";
 import Image from "next/image";
+import { Event } from "@/types/event";
 
 export const revalidate = 3600; // 1時間ごとに再検証
 
-export default async function LocationsPage() {
+export default async function SchedulePage() {
   try {
-    const locations = await getLocations();
+    const events: Event[] = await getEvents();
 
     return (
       <>
         <Header />
         <main className="min-h-screen">
           {/* ヒーローセクション */}
-          <div className="relative h-[40vh] min-h-[400px]">
+          <div className="relative h-[40vh] min-h-[300px]">
             {/* 背景画像 */}
             <div className="absolute inset-0">
               <Image
-                src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=2070"
+                src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2940"
                 alt="テニスコート"
                 fill
                 className="object-cover"
@@ -32,34 +33,20 @@ export default async function LocationsPage() {
             <div className="relative h-full flex flex-col items-center justify-center">
               <div className="container mx-auto px-4 text-center">
                 <h1 className="text-4xl md:text-5xl font-bold text-tennis-line mb-4 drop-shadow-lg">
-                  開催場所一覧
+                  開催予定
                 </h1>
                 <p className="text-xl text-tennis-line/90 drop-shadow-md max-w-2xl mx-auto">
-                  Joy'n Tennisの活動拠点をご紹介します。
-                  予約状況に応じて、これらの会場で活動を行っています。
+                  Joy'n Tennisの活動予定をご確認ください。 予約状況に応じて随時更新しています。
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 場所一覧セクション */}
+          {/* カレンダーセクション */}
           <section className="py-16 bg-primary-50">
             <div className="container mx-auto px-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {locations.map((location) => (
-                  <div
-                    key={location.id}
-                    className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all border-l-4 border-accent-500"
-                  >
-                    <h2 className="text-xl font-semibold mb-2 text-tennis-court">
-                      {location.name}
-                    </h2>
-                    <p className="text-gray-600 mb-4">{location.address}</p>
-                    <div className="mb-4">
-                      <LocationMap location={location} />
-                    </div>
-                  </div>
-                ))}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <EventCalendar events={events} />
               </div>
             </div>
           </section>
@@ -68,16 +55,16 @@ export default async function LocationsPage() {
       </>
     );
   } catch (error) {
-    console.error("Error in LocationsPage:", error);
+    console.error("Error in SchedulePage:", error);
     return (
       <>
         <Header />
         <main className="min-h-screen">
-          <div className="relative h-[40vh] min-h-[400px]">
+          <div className="relative h-[40vh] min-h-[300px]">
             {/* 背景画像 */}
             <div className="absolute inset-0">
               <Image
-                src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=2070"
+                src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2940"
                 alt="テニスコート"
                 fill
                 className="object-cover"
@@ -90,11 +77,10 @@ export default async function LocationsPage() {
             <div className="relative h-full flex flex-col items-center justify-center">
               <div className="container mx-auto px-4 text-center">
                 <h1 className="text-4xl md:text-5xl font-bold text-tennis-line mb-4 drop-shadow-lg">
-                  開催場所一覧
+                  開催予定
                 </h1>
                 <p className="text-xl text-tennis-line/90 drop-shadow-md max-w-2xl mx-auto">
-                  Joy'n Tennisの活動拠点をご紹介します。
-                  予約状況に応じて、これらの会場で活動を行っています。
+                  Joy'n Tennisの活動予定をご確認ください。 予約状況に応じて随時更新しています。
                 </p>
               </div>
             </div>
