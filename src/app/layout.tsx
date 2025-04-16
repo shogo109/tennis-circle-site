@@ -1,12 +1,14 @@
-import "./globals.css";
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import "./globals.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "Joy'n Tennis | 名古屋のテニスサークル",
-  description:
-    "名古屋市を中心に活動する、アットホームなテニスサークルです。初心者から経験者まで、幅広い方々が参加しています。",
+export const metadata: Metadata = {
+  title: "Joy'n Tennis",
+  description: "テニスサークルJoy'n Tennisの公式サイトです。",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="ja"
       className="scroll-smooth"
     >
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <body className={`${inter.className} antialiased`}>
+        <Header />
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }

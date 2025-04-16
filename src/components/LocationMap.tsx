@@ -16,12 +16,13 @@ export default function LocationMap({ location }: Props) {
   }
 
   return (
-    <div className="w-full h-[300px] rounded-lg overflow-hidden">
+    <div className="w-full h-[300px] rounded-lg overflow-hidden relative">
       <iframe
+        title={`${location.name}の地図`}
         src={location.map_url}
         width="100%"
         height="100%"
-        style={{ border: 0 }}
+        style={{ border: 0, position: "absolute", top: 0, left: 0 }}
         allowFullScreen
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"

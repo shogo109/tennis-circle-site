@@ -1,9 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
     extend: {
       colors: {
+        "tennis-court": "#2E7D32",
+        "tennis-court-dark": "#1B5E20",
         primary: {
           50: "#f0fdf4",
           100: "#dcfce7",
@@ -36,6 +42,19 @@ module.exports = {
       },
       fontFamily: {
         sans: ["Inter var", "sans-serif"],
+      },
+      keyframes: {
+        fade: {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
+      },
+      animation: {
+        fade: "fade 0.3s ease-in-out",
       },
     },
   },
