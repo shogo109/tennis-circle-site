@@ -5,10 +5,32 @@ import { Location } from "@/types/location";
 import LocationCategory from "@/components/LocationCategory";
 import LocationForm from "@/components/LocationForm";
 
+interface UserInfo {
+  _id: string;
+  name: string;
+  admin: boolean;
+}
+
 export default function LocationsClient() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // ユーザーの管理者権限を確認
+    const userInfoStr = sessionStorage.getItem("userInfo");
+    if (userInfoStr) {
+      try {
+        const decodedData = atob(userInfoStr);
+        const userInfo: UserInfo = JSON.parse(decodeURIComponent(decodedData));
+        setIsAdmin(userInfo.admin);
+      } catch (error) {
+        console.error("Error parsing user info:", error);
+        setIsAdmin(false);
+      }
+    }
+  }, []);
 
   const fetchLocations = async () => {
     try {
@@ -80,7 +102,7 @@ export default function LocationsClient() {
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 場所一覧 */}
-          <div className="lg:col-span-2">
+          <div className={isAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
             <div className="space-y-6">
               {Object.entries(locationsByCategory).map(([category, locations]) => (
                 <LocationCategory
@@ -92,12 +114,14 @@ export default function LocationsClient() {
             </div>
           </div>
 
-          {/* 登録フォーム */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <LocationForm onLocationAdded={fetchLocations} />
+          {/* 登録フォーム（管理者のみ表示） */}
+          {isAdmin && (
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                <LocationForm onLocationAdded={fetchLocations} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

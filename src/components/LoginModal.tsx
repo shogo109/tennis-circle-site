@@ -9,8 +9,9 @@ interface LoginModalProps {
 }
 
 interface UserInfo {
-  username: string;
-  userId: string;
+  _id: string;
+  name: string;
+  admin: boolean;
 }
 
 export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps) {
@@ -18,11 +19,17 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     setIsLoading(true);
+
+    // ユーザー名から全ての空白を削除
+    const normalizedUsername = username.replace(/\s+/g, "");
+    console.log("Normalized username:", normalizedUsername);
 
     try {
       const response = await fetch("/api/auth", {
@@ -30,10 +37,11 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: normalizedUsername, password }),
       });
 
       const data = await response.json();
+      console.log("API Response:", data);
 
       if (!response.ok) {
         setError(data.error);
@@ -42,19 +50,52 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
 
       // ユーザー情報をエンコード
       const userInfo: UserInfo = {
-        username: username,
-        userId: data.userId, // APIレスポンスからユーザーIDを取得
+        _id: data._id,
+        name: data.name,
+        admin: data.admin,
       };
-      const encodedData = btoa(encodeURIComponent(JSON.stringify(userInfo)));
-      localStorage.setItem("userInfo", encodedData);
+      console.log("User info before encoding:", userInfo);
 
-      onLogin(username);
-      onClose();
+      const jsonString = JSON.stringify(userInfo);
+      console.log("JSON string:", jsonString);
+
+      const encodedJson = encodeURIComponent(jsonString);
+      console.log("URL encoded:", encodedJson);
+
+      const encodedData = btoa(encodedJson);
+      console.log("Base64 encoded:", encodedData);
+
+      sessionStorage.setItem("userInfo", encodedData);
+
+      // 保存されたデータを確認
+      const savedData = sessionStorage.getItem("userInfo");
+      console.log("Saved data:", savedData);
+
+      if (savedData) {
+        const decodedData = atob(savedData);
+        console.log("Decoded data:", decodedData);
+        const parsedData = JSON.parse(decodeURIComponent(decodedData));
+        console.log("Parsed data:", parsedData);
+      }
+
+      setSuccessMessage(`${data.name}さん、ようこそ！`);
+
+      // 1秒後にモーダルを閉じる
+      setTimeout(() => {
+        onLogin(data.name);
+        onClose();
+      }, 1000);
     } catch (error) {
       setError("ログイン中にエラーが発生しました");
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 入力時に全ての空白を削除
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value.replace(/\s+/g, ""));
   };
 
   if (!isOpen) return null;
@@ -78,7 +119,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
               type="text"
               id="username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleUsernameChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tennis-court focus:border-transparent"
               required
               disabled={isLoading}
@@ -102,6 +143,9 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
+          {successMessage && (
+            <p className="text-tennis-court text-sm font-medium text-center">{successMessage}</p>
+          )}
           <div className="flex justify-end space-x-4 mt-6">
             <button
               type="button"

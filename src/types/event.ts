@@ -1,6 +1,8 @@
 import { Location } from "./location";
 import { AttendanceStatus } from "@/lib/notion/attendance";
 
+export type EventCategory = "練習" | "試合" | "その他";
+
 export type Event = {
   id: string;
   _id: number;
@@ -8,6 +10,7 @@ export type Event = {
   startDate: string; // 開始時間
   endDate: string; // 終了時間
   location: Location;
+  category: EventCategory;
   myAttendance?: AttendanceStatus;
   attendances?: Array<{
     userId: string;

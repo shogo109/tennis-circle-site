@@ -32,11 +32,13 @@ export async function getUser(username: string) {
     const pageUser = user as PageObjectResponse;
     const nameProperty = pageUser.properties.name as { rich_text: RichTextItemResponse[] };
     const idProperty = pageUser.properties._id as { number: number };
+    const adminProperty = pageUser.properties.admin as { number: number };
 
     return {
       id: user.id,
       _id: idProperty?.number || 0,
       name: nameProperty.rich_text[0]?.plain_text || "",
+      admin: adminProperty?.number === 1,
     };
   } catch (error) {
     console.error("Error fetching user:", error);

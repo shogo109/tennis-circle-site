@@ -17,6 +17,7 @@ interface Props {
 interface UserInfo {
   username: string;
   userId: string;
+  notionUserId?: string;
 }
 
 interface User {
@@ -102,7 +103,7 @@ export default function AttendanceClient({}: Props) {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const encodedData = localStorage.getItem("userInfo");
+      const encodedData = sessionStorage.getItem("userInfo");
       if (!encodedData) {
         router.push("/");
         return;
@@ -110,9 +111,36 @@ export default function AttendanceClient({}: Props) {
 
       try {
         const decodedData = JSON.parse(decodeURIComponent(atob(encodedData)));
-        setUserInfo(decodedData);
+
+        // まず基本的なユーザー情報をセット
+        const initialUserInfo = {
+          userId: decodedData._id.toString(),
+          username: decodedData.name,
+          notionUserId: undefined,
+        };
+        setUserInfo(initialUserInfo);
+
+        // Notionユーザー情報を取得
+        try {
+          const response = await fetch("/api/users");
+          if (!response.ok) {
+            throw new Error("Failed to fetch users");
+          }
+          const users = await response.json();
+
+          // 現在のユーザーのNotionユーザーIDを探す
+          const currentUser = users.find((user) => user.username === decodedData.name);
+          if (currentUser?.notionUserId) {
+            setUserInfo((prev) => ({
+              ...prev,
+              notionUserId: currentUser.id,
+            }));
+          }
+        } catch (error) {
+          console.error("Error fetching user info");
+        }
       } catch (error) {
-        console.error("Error decoding user info:", error);
+        console.error("Error processing user info");
         router.push("/");
       }
     };
@@ -122,7 +150,7 @@ export default function AttendanceClient({}: Props) {
 
   const handleAttendanceUpdate = async (eventId: string, status: AttendanceStatus) => {
     try {
-      if (!userInfo) return;
+      if (!userInfo || !userInfo.notionUserId) return;
 
       setIsUpdating(eventId);
 
@@ -133,7 +161,7 @@ export default function AttendanceClient({}: Props) {
         },
         body: JSON.stringify({
           eventId,
-          userId: userInfo.userId,
+          userId: userInfo.notionUserId,
           status,
         }),
       });
@@ -149,7 +177,9 @@ export default function AttendanceClient({}: Props) {
         prevEvents.map((event) => {
           if (event.id === eventId) {
             const updatedAttendances = event.attendances || [];
-            const existingIndex = updatedAttendances.findIndex((a) => a.userId === userInfo.userId);
+            const existingIndex = updatedAttendances.findIndex(
+              (a) => a.userId === userInfo.notionUserId
+            );
 
             if (existingIndex >= 0) {
               updatedAttendances[existingIndex] = {
@@ -158,7 +188,7 @@ export default function AttendanceClient({}: Props) {
               };
             } else {
               updatedAttendances.push({
-                userId: userInfo.userId,
+                userId: userInfo.notionUserId,
                 userName: userInfo.username,
                 status: updatedAttendance.status,
               });
@@ -256,7 +286,9 @@ export default function AttendanceClient({}: Props) {
       ) : (
         <div className="space-y-4">
           {events.map((event) => {
-            const userAttendance = event.attendances?.find((a) => a.userId === userInfo?.userId);
+            const userAttendance = event.attendances?.find(
+              (a) => a.userId === userInfo?.notionUserId
+            );
             const isEventUpdating = isUpdating === event.id;
 
             return (

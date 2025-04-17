@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "react-big-calendar/lib/css/react-big-calendar.css";
+
 @layer base {
   html {
     @apply antialiased;
@@ -21,6 +23,11 @@
 
   h3 {
     @apply text-2xl font-bold;
+  }
+
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
   }
 }
 

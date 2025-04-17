@@ -28,6 +28,7 @@ export async function GET() {
     const users = response.results.map((page: any) => ({
       id: page.id,
       username: page.properties.name.rich_text[0]?.plain_text || "",
+      notionUserId: page.id,
     }));
 
     return NextResponse.json(users);

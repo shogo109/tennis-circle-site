@@ -1,9 +1,42 @@
 import { getEvents } from "@/lib/notion/events";
 import Image from "next/image";
-import EventCalendar from "@/components/EventCalendar";
-import { Event } from "@/types/event";
+import dynamic from "next/dynamic";
+
+const EventCalendar = dynamic(() => import("@/components/EventCalendar"), {
+  ssr: false,
+});
 
 export const revalidate = 3600; // 1時間ごとに再検証
+
+function PageHeader() {
+  return (
+    <div className="relative h-[30vh] min-h-[200px]">
+      {/* 背景画像 */}
+      <div className="absolute inset-0">
+        <Image
+          src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2940"
+          alt="テニスコート"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-tennis-court/90 to-primary-600/80" />
+      </div>
+
+      {/* コンテンツ */}
+      <div className="relative h-full flex flex-col items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl md:text-4xl font-bold text-tennis-line mb-2 drop-shadow-lg">
+            開催予定
+          </h1>
+          <p className="text-base md:text-lg text-tennis-line/90 drop-shadow-md">
+            予約状況に応じて随時更新しています
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default async function SchedulePage() {
   try {
@@ -11,37 +44,10 @@ export default async function SchedulePage() {
 
     return (
       <main className="min-h-screen">
-        <div className="relative h-[40vh] min-h-[300px]">
-          {/* 背景画像 */}
-          <div className="absolute inset-0">
-            <Image
-              src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2940"
-              alt="テニスコート"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-tennis-court/90 to-primary-600/80" />
-          </div>
-
-          {/* コンテンツ */}
-          <div className="relative h-full flex flex-col items-center justify-center">
-            <div className="container mx-auto px-4 text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-tennis-line mb-4 drop-shadow-lg">
-                開催予定
-              </h1>
-              <p className="text-xl text-tennis-line/90 drop-shadow-md max-w-2xl mx-auto">
-                Joy'n Tennisの活動予定をご確認ください。 予約状況に応じて随時更新しています。
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <section className="py-16 bg-primary-50">
-          <div className="container mx-auto px-4">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <EventCalendar events={events} />
-            </div>
+        <PageHeader />
+        <section className="py-8 bg-primary-50">
+          <div className="max-w-[1400px] mx-auto px-2 md:px-4">
+            <EventCalendar events={events} />
           </div>
         </section>
       </main>
@@ -50,35 +56,10 @@ export default async function SchedulePage() {
     console.error("Error in SchedulePage:", error);
     return (
       <main className="min-h-screen">
-        <div className="relative h-[40vh] min-h-[300px]">
-          {/* 背景画像 */}
-          <div className="absolute inset-0">
-            <Image
-              src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2940"
-              alt="テニスコート"
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-tennis-court/90 to-primary-600/80" />
-          </div>
-
-          {/* コンテンツ */}
-          <div className="relative h-full flex flex-col items-center justify-center">
-            <div className="container mx-auto px-4 text-center">
-              <h1 className="text-4xl md:text-5xl font-bold text-tennis-line mb-4 drop-shadow-lg">
-                開催予定
-              </h1>
-              <p className="text-xl text-tennis-line/90 drop-shadow-md max-w-2xl mx-auto">
-                Joy'n Tennisの活動予定をご確認ください。 予約状況に応じて随時更新しています。
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <section className="py-16 bg-primary-50">
-          <div className="container mx-auto px-4">
-            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+        <PageHeader />
+        <section className="py-8 bg-primary-50">
+          <div className="max-w-[1400px] mx-auto px-2 md:px-4">
+            <div className="text-center">
               <p className="text-red-500 text-lg">
                 データの取得中にエラーが発生しました。
                 <br />

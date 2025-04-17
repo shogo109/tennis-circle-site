@@ -1,5 +1,5 @@
 import { Client } from "@notionhq/client";
-import { Event } from "@/types/event";
+import { Event, EventCategory } from "@/types/event";
 import { getLocationById } from "./locations";
 
 // サーバーサイドでのみ実行されることを確認
@@ -52,6 +52,7 @@ export async function getEvents(): Promise<Event[]> {
           name: "場所未定",
           address: "",
           map_url: "",
+          category: "その他" as EventCategory,
         };
 
         return {
@@ -61,6 +62,7 @@ export async function getEvents(): Promise<Event[]> {
           startDate: page.properties.event_date.date.start,
           endDate: page.properties.event_date.date.end || null,
           location: location || defaultLocation,
+          category: (location?.category || "その他") as EventCategory,
         };
       })
     );
@@ -117,5 +119,66 @@ async function getMaxEventId(): Promise<number> {
   } catch (error) {
     console.error("Error getting max event ID:", error);
     return 0;
+  }
+}
+
+export async function createEvent(
+  locationId: string,
+  startDate: string,
+  endDate: string | null
+): Promise<Event> {
+  if (!process.env.NOTION_EVENTS_DATABASE_ID) {
+    throw new Error("NOTION_EVENTS_DATABASE_ID is not defined");
+  }
+
+  try {
+    // 最大のイベントIDを取得
+    const maxId = await getMaxEventId();
+    const newId = maxId + 1;
+
+    // イベントを作成
+    const response = await notion.pages.create({
+      parent: {
+        database_id: process.env.NOTION_EVENTS_DATABASE_ID,
+      },
+      properties: {
+        _id: {
+          number: newId,
+        },
+        event_date: {
+          date: {
+            start: startDate,
+            end: endDate,
+          },
+        },
+        location_id: {
+          relation: [
+            {
+              id: locationId,
+            },
+          ],
+        },
+      },
+    });
+
+    // 作成したイベントの情報を取得
+    const location = await getLocationById(locationId);
+
+    if (!location) {
+      throw new Error("Location not found");
+    }
+
+    return {
+      id: response.id,
+      _id: newId,
+      notionPageId: response.id,
+      startDate: startDate,
+      endDate: endDate || null,
+      location: location,
+      category: location.category as EventCategory,
+    };
+  } catch (error) {
+    console.error("Error creating event in Notion:", error);
+    throw error;
   }
 }

@@ -17,8 +17,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      username: user.name,
-      userId: user.id,
+      _id: user._id,
+      name: user.name,
+      admin: user.admin,
     });
   } catch (error) {
     console.error("Authentication error:", error);

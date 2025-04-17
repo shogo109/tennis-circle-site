@@ -5,6 +5,12 @@ import { useState, useEffect } from "react";
 import LoginModal from "./LoginModal";
 import { useRouter } from "next/navigation";
 
+interface UserInfo {
+  _id: string;
+  name: string;
+  admin: boolean;
+}
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -19,11 +25,12 @@ export default function Header() {
     };
 
     // ログイン状態の確認
-    const userInfoStr = localStorage.getItem("userInfo");
+    const userInfoStr = sessionStorage.getItem("userInfo");
     if (userInfoStr) {
       try {
-        const userInfo = JSON.parse(decodeURIComponent(atob(userInfoStr)));
-        setUsername(userInfo.username);
+        const decodedData = atob(userInfoStr);
+        const userInfo: UserInfo = JSON.parse(decodeURIComponent(decodedData));
+        setUsername(userInfo.name);
         setIsLoggedIn(true);
       } catch (error) {
         console.error("Error parsing user info:", error);
@@ -41,7 +48,7 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userInfo");
+    sessionStorage.removeItem("userInfo");
     setUsername("");
     setIsLoggedIn(false);
     router.push("/");

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getEvents } from "@/lib/notion/events";
+import { getEvents, createEvent } from "@/lib/notion/events";
 import { getAttendancesByEventDateId } from "@/lib/notion/attendance";
 
 export async function GET() {
@@ -25,5 +25,20 @@ export async function GET() {
   } catch (error) {
     console.error("Error in events API:", error);
     return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { locationId, startDate, endDate } = body;
+
+    // イベントを作成
+    const event = await createEvent(locationId, startDate, endDate);
+
+    return NextResponse.json(event);
+  } catch (error) {
+    console.error("Error creating event:", error);
+    return NextResponse.json({ error: "イベントの登録に失敗しました" }, { status: 500 });
   }
 }
