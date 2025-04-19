@@ -1,33 +1,36 @@
 import { NextResponse } from "next/server";
 import { createOrUpdateAttendance } from "@/lib/notion/attendance";
-import type { AttendanceStatus } from "@/lib/notion/attendance";
+import { AttendanceStatus } from "@/lib/notion/attendance";
 
 export async function POST(request: Request) {
   try {
-    const { eventId, userId, status } = await request.json();
+    const body = await request.json();
+    const { eventId, userId, status, memo } = body;
 
-    // バリデーション
     if (!eventId || !userId || !status) {
-      console.error("Missing required fields:", { eventId, userId, status });
-      return NextResponse.json(
-        { error: "Missing required fields: eventId, userId, or status" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "必須パラメータが不足しています" }, { status: 400 });
     }
 
-    const result = await createOrUpdateAttendance(eventId, userId, status as AttendanceStatus);
-
-    if (!result) {
-      return NextResponse.json({ error: "Failed to update attendance" }, { status: 500 });
+    // 出欠ステータスのバリデーション
+    const validStatuses: AttendanceStatus[] = ["going", "not_going", "maybe"];
+    if (!validStatuses.includes(status as AttendanceStatus)) {
+      return NextResponse.json({ error: "無効な出欠ステータスです" }, { status: 400 });
     }
 
-    return NextResponse.json(result);
+    const newAttendance = await createOrUpdateAttendance(
+      eventId,
+      userId,
+      status as AttendanceStatus,
+      memo
+    );
+
+    if (!newAttendance) {
+      return NextResponse.json({ error: "出欠の更新に失敗しました" }, { status: 500 });
+    }
+
+    return NextResponse.json(newAttendance);
   } catch (error) {
     console.error("Error updating attendance:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
-      { error: "Failed to update attendance", details: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "出欠の更新に失敗しました" }, { status: 500 });
   }
 }

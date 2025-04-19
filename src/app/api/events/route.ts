@@ -16,6 +16,7 @@ export async function GET() {
             userId: attendance.userId,
             userName: attendance.userId,
             status: attendance.status,
+            memo: attendance.memo,
           })),
         };
       })

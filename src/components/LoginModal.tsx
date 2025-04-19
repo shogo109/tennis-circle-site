@@ -27,9 +27,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
     setSuccessMessage("");
     setIsLoading(true);
 
-    // ユーザー名から全ての空白を削除
     const normalizedUsername = username.replace(/\s+/g, "");
-    console.log("Normalized username:", normalizedUsername);
 
     try {
       const response = await fetch("/api/auth", {
@@ -41,42 +39,23 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
       });
 
       const data = await response.json();
-      console.log("API Response:", data);
 
       if (!response.ok) {
         setError(data.error);
         return;
       }
 
-      // ユーザー情報をエンコード
       const userInfo: UserInfo = {
         _id: data._id,
         name: data.name,
         admin: data.admin,
       };
-      console.log("User info before encoding:", userInfo);
 
       const jsonString = JSON.stringify(userInfo);
-      console.log("JSON string:", jsonString);
-
       const encodedJson = encodeURIComponent(jsonString);
-      console.log("URL encoded:", encodedJson);
-
       const encodedData = btoa(encodedJson);
-      console.log("Base64 encoded:", encodedData);
 
       sessionStorage.setItem("userInfo", encodedData);
-
-      // 保存されたデータを確認
-      const savedData = sessionStorage.getItem("userInfo");
-      console.log("Saved data:", savedData);
-
-      if (savedData) {
-        const decodedData = atob(savedData);
-        console.log("Decoded data:", decodedData);
-        const parsedData = JSON.parse(decodeURIComponent(decodedData));
-        console.log("Parsed data:", parsedData);
-      }
 
       setSuccessMessage(`${data.name}さん、ようこそ！`);
 
@@ -87,7 +66,6 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
       }, 1000);
     } catch (error) {
       setError("ログイン中にエラーが発生しました");
-      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }

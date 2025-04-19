@@ -50,6 +50,7 @@ export default function AttendanceClient({}: Props) {
   const [isChangeModalOpen, setIsChangeModalOpen] = useState(false);
   const [selectedEventForChange, setSelectedEventForChange] = useState<Event | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [attendanceMemo, setAttendanceMemo] = useState("");
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -149,13 +150,14 @@ export default function AttendanceClient({}: Props) {
   }, [router]);
 
   const handleAttendanceUpdate = async (eventId: string, status: AttendanceStatus) => {
+    setIsUpdating(eventId);
     try {
-      if (!userInfo || !userInfo.notionUserId) return;
+      if (!userInfo || !userInfo.notionUserId) {
+        throw new Error("ユーザー情報が見つかりません");
+      }
 
-      setIsUpdating(eventId);
-
-      const response = await fetch("/api/attendance/update", {
-        method: "PUT",
+      const response = await fetch("/api/attendance", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
@@ -163,6 +165,7 @@ export default function AttendanceClient({}: Props) {
           eventId,
           userId: userInfo.notionUserId,
           status,
+          memo: attendanceMemo.trim() || undefined,
         }),
       });
 
@@ -185,12 +188,14 @@ export default function AttendanceClient({}: Props) {
               updatedAttendances[existingIndex] = {
                 ...updatedAttendances[existingIndex],
                 status: updatedAttendance.status,
+                memo: updatedAttendance.memo,
               };
             } else {
               updatedAttendances.push({
                 userId: userInfo.notionUserId,
                 userName: userInfo.username,
                 status: updatedAttendance.status,
+                memo: updatedAttendance.memo,
               });
             }
 
@@ -404,11 +409,14 @@ export default function AttendanceClient({}: Props) {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
-                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                         名前
                       </th>
-                      <th className="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 bg-gray-50 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                         参加状況
+                      </th>
+                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px]">
+                        メモ
                       </th>
                     </tr>
                   </thead>
@@ -419,13 +427,18 @@ export default function AttendanceClient({}: Props) {
                       );
                       return (
                         <tr key={user.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 w-32">
                             {user.username}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <td className="px-6 py-4 whitespace-nowrap text-center w-24">
                             <div className="flex justify-center">
                               {getStatusIcon(attendance?.status || null)}
                             </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500 min-w-[300px]">
+                            {attendance?.memo && (
+                              <div className="break-words">{attendance.memo}</div>
+                            )}
                           </td>
                         </tr>
                       );
@@ -499,6 +512,13 @@ export default function AttendanceClient({}: Props) {
                   >
                     検討中
                   </button>
+                  <textarea
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-tennis-court focus:border-tennis-court"
+                    rows={3}
+                    placeholder="メモを入力（任意）"
+                    value={attendanceMemo}
+                    onChange={(e) => setAttendanceMemo(e.target.value)}
+                  />
                 </div>
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <button

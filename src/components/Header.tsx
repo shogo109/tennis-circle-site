@@ -139,42 +139,51 @@ export default function Header() {
             </nav>
 
             {/* モバイルメニューボタン */}
-            <button
-              type="button"
-              className="md:hidden p-2 rounded-md text-tennis-court/60 hover:text-tennis-court hover:bg-tennis-court/5 transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <span className="sr-only">メニューを開く</span>
-              {!isMenuOpen ? (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+            <div className="md:hidden flex items-center gap-2">
+              {isLoggedIn && (
+                <div className="w-8 h-8 rounded-full bg-tennis-court/10 flex items-center justify-center">
+                  <span className="text-sm font-medium text-tennis-court">
+                    {username.charAt(0)}
+                  </span>
+                </div>
               )}
-            </button>
+              <button
+                type="button"
+                className="p-2 rounded-md text-tennis-court/60 hover:text-tennis-court hover:bg-tennis-court/5 transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <span className="sr-only">メニューを開く</span>
+                {!isMenuOpen ? (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -187,12 +196,14 @@ export default function Header() {
           <div className="container py-2 space-y-1">
             <Link
               href="/schedule"
+              onClick={() => setIsMenuOpen(false)}
               className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
             >
               開催予定
             </Link>
             <Link
               href="/locations"
+              onClick={() => setIsMenuOpen(false)}
               className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
             >
               開催場所
@@ -200,6 +211,7 @@ export default function Header() {
             {isLoggedIn && (
               <Link
                 href="/attendance"
+                onClick={() => setIsMenuOpen(false)}
                 className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
               >
                 出欠確認
@@ -207,31 +219,34 @@ export default function Header() {
             )}
             <Link
               href="#features"
+              onClick={() => setIsMenuOpen(false)}
               className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
             >
               特徴
             </Link>
             <Link
               href="#contact"
+              onClick={() => setIsMenuOpen(false)}
               className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
             >
               お問い合わせ
             </Link>
             {isLoggedIn ? (
-              <>
-                <div className="px-4 py-2 text-sm font-medium text-tennis-court">
-                  {username}さん
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
-                >
-                  ログアウト
-                </button>
-              </>
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  handleLogout();
+                }}
+                className="block w-full text-left text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
+              >
+                ログアウト
+              </button>
             ) : (
               <button
-                onClick={() => setIsLoginModalOpen(true)}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setIsLoginModalOpen(true);
+                }}
                 className="block w-full text-left text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
               >
                 ログイン
@@ -239,6 +254,7 @@ export default function Header() {
             )}
             <Link
               href="/apply"
+              onClick={() => setIsMenuOpen(false)}
               className="block bg-accent-500 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-accent-600 transition-colors mt-4 text-center mx-4"
             >
               参加申し込み

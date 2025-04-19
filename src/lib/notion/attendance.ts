@@ -16,6 +16,7 @@ export interface Attendance {
   userId: string;
   userName?: string;
   status: AttendanceStatus;
+  memo?: string;
 }
 
 export async function getAttendancesByEventDateId(eventDateId: string): Promise<Attendance[]> {
@@ -39,6 +40,7 @@ export async function getAttendancesByEventDateId(eventDateId: string): Promise<
         const userIdRelation = properties.attendance_user_id?.relation || [];
         const attendanceStatus = properties.attendance_status?.rich_text?.[0]?.plain_text;
         const attendanceId = properties._id?.number;
+        const memoText = properties.memo?.rich_text?.[0]?.plain_text;
 
         if (!attendanceStatus || attendanceId === undefined) {
           return null;
@@ -58,6 +60,7 @@ export async function getAttendancesByEventDateId(eventDateId: string): Promise<
           eventDateId: eventDateRelation[0]?.id || eventDateId,
           userId: userIdRelation[0]?.id || "",
           status: attendanceStatus as AttendanceStatus,
+          ...(memoText ? { memo: memoText } : {}),
         };
       })
       .filter((attendance): attendance is Attendance => attendance !== null);
@@ -90,6 +93,7 @@ export async function getAttendancesByEventDateIds(eventDateIds: string[]): Prom
         const userIdRelation = properties.attendance_user_id?.relation || [];
         const attendanceStatus = properties.attendance_status?.rich_text?.[0]?.plain_text;
         const attendanceId = properties._id?.number;
+        const memoText = properties.memo?.rich_text?.[0]?.plain_text;
 
         if (!attendanceStatus || attendanceId === undefined) {
           return null;
@@ -109,6 +113,7 @@ export async function getAttendancesByEventDateIds(eventDateIds: string[]): Prom
           eventDateId: eventDateRelation[0]?.id || "",
           userId: userIdRelation[0]?.id || "",
           status: attendanceStatus as AttendanceStatus,
+          ...(memoText ? { memo: memoText } : {}),
         };
       })
       .filter((attendance): attendance is Attendance => attendance !== null);
@@ -147,7 +152,8 @@ async function getMaxAttendanceId(): Promise<number> {
 export async function createOrUpdateAttendance(
   eventDateId: string,
   userId: string,
-  status: AttendanceStatus
+  status: AttendanceStatus,
+  memo?: string
 ): Promise<Attendance | null> {
   try {
     const response = await notion.databases.query({
@@ -178,12 +184,27 @@ export async function createOrUpdateAttendance(
           attendance_status: {
             rich_text: [
               {
+                type: "text",
                 text: {
                   content: status,
                 },
               },
             ],
           },
+          memo: memo
+            ? {
+                rich_text: [
+                  {
+                    type: "text",
+                    text: {
+                      content: memo,
+                    },
+                  },
+                ],
+              }
+            : {
+                rich_text: [],
+              },
         },
       });
 
@@ -194,6 +215,7 @@ export async function createOrUpdateAttendance(
       const userIdRelation = properties.attendance_user_id?.relation || [];
       const attendanceStatus = properties.attendance_status?.rich_text[0]?.plain_text;
       const attendanceId = properties._id?.number;
+      const memoText = properties.memo?.rich_text[0]?.plain_text;
 
       if (!attendanceStatus || attendanceId === undefined) {
         console.warn(`Missing required properties for page ${page.id}`);
@@ -206,6 +228,7 @@ export async function createOrUpdateAttendance(
         eventDateId: eventDateRelation[0]?.id || eventDateId,
         userId: userIdRelation[0]?.id || userId,
         status: attendanceStatus as AttendanceStatus,
+        ...(memoText ? { memo: memoText } : {}),
       };
     } else {
       // 新規出欠を作成
@@ -219,6 +242,7 @@ export async function createOrUpdateAttendance(
           title: {
             title: [
               {
+                type: "text",
                 text: {
                   content: `出欠_${nextId}`,
                 },
@@ -245,12 +269,27 @@ export async function createOrUpdateAttendance(
           attendance_status: {
             rich_text: [
               {
+                type: "text",
                 text: {
                   content: status,
                 },
               },
             ],
           },
+          memo: memo
+            ? {
+                rich_text: [
+                  {
+                    type: "text",
+                    text: {
+                      content: memo,
+                    },
+                  },
+                ],
+              }
+            : {
+                rich_text: [],
+              },
         },
       });
 
@@ -261,6 +300,7 @@ export async function createOrUpdateAttendance(
       const userIdRelation = properties.attendance_user_id?.relation || [];
       const attendanceStatus = properties.attendance_status?.rich_text[0]?.plain_text;
       const attendanceId = properties._id?.number;
+      const memoText = properties.memo?.rich_text[0]?.plain_text;
 
       if (!attendanceStatus || attendanceId === undefined) {
         console.warn(`Missing required properties for page ${page.id}`);
@@ -273,116 +313,11 @@ export async function createOrUpdateAttendance(
         eventDateId: eventDateRelation[0]?.id || eventDateId,
         userId: userIdRelation[0]?.id || userId,
         status: attendanceStatus as AttendanceStatus,
+        ...(memoText ? { memo: memoText } : {}),
       };
     }
   } catch (error) {
     console.error("Error creating/updating attendance:", error);
     return null;
-  }
-}
-
-export async function updateAttendance(
-  eventDateId: string,
-  userId: string,
-  status: AttendanceStatus
-): Promise<Attendance> {
-  if (!process.env.NOTION_API_KEY) {
-    throw new Error("Notion API key is not set");
-  }
-  if (!ATTENDANCE_DATABASE_ID) {
-    throw new Error("Notion attendance database ID is not set");
-  }
-
-  try {
-    // 既存の出欠を検索と最大IDの取得を並列実行
-    const [response, maxId] = await Promise.all([
-      notion.databases.query({
-        database_id: ATTENDANCE_DATABASE_ID,
-        filter: {
-          and: [
-            {
-              property: "event_date_id",
-              relation: {
-                contains: eventDateId,
-              },
-            },
-            {
-              property: "attendance_user_id",
-              relation: {
-                contains: userId,
-              },
-            },
-          ],
-        },
-      }),
-      getMaxAttendanceId(),
-    ]);
-
-    const nextId =
-      response.results.length > 0
-        ? ((response.results[0] as PageObjectResponse).properties._id as { number: number }).number
-        : maxId + 1;
-
-    const properties = {
-      _id: {
-        number: nextId,
-      },
-      title: {
-        title: [
-          {
-            text: {
-              content: `出欠_${nextId}`,
-            },
-          },
-        ],
-      },
-      event_date_id: {
-        relation: [
-          {
-            id: eventDateId,
-          },
-        ],
-      },
-      attendance_user_id: {
-        relation: [
-          {
-            id: userId,
-          },
-        ],
-      },
-      attendance_status: {
-        rich_text: [
-          {
-            text: {
-              content: status,
-            },
-          },
-        ],
-      },
-    };
-
-    const updatedPage =
-      response.results.length > 0
-        ? await notion.pages.update({
-            page_id: response.results[0].id,
-            properties,
-          })
-        : await notion.pages.create({
-            parent: {
-              database_id: ATTENDANCE_DATABASE_ID,
-            },
-            properties,
-          });
-
-    return {
-      id: updatedPage.id,
-      _id: nextId,
-      eventDateId,
-      userId,
-      status,
-    };
-  } catch (error) {
-    console.error("Error updating attendance in Notion:", error);
-    throw new Error("Failed to update attendance");
   }
 }

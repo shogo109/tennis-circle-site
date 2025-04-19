@@ -3,6 +3,13 @@ import { AttendanceStatus } from "@/lib/notion/attendance";
 
 export type EventCategory = "練習" | "試合" | "その他";
 
+export interface Attendance {
+  userId: string;
+  userName: string;
+  status: AttendanceStatus;
+  memo?: string;
+}
+
 export type Event = {
   id: string;
   _id: number;
@@ -12,9 +19,5 @@ export type Event = {
   location: Location;
   category: EventCategory;
   myAttendance?: AttendanceStatus;
-  attendances?: Array<{
-    userId: string;
-    userName: string;
-    status: AttendanceStatus;
-  }>;
+  attendances?: Array<Attendance>;
 };
