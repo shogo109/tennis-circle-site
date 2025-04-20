@@ -32,7 +32,7 @@ export async function getLocations(): Promise<Location[]> {
       id: page.id,
       _id: page.properties._id?.number || 0,
       notionPageId: page.id,
-      name: page.properties.location_name.rich_text[0]?.plain_text || "",
+      name: page.properties.location_name.title[0]?.plain_text || "",
       address: page.properties.address.rich_text[0]?.plain_text || "",
       map_url: page.properties.map_url?.url || undefined,
       category: page.properties.category?.select?.name || "",
@@ -50,7 +50,7 @@ export async function getLocationById(locationId: string): Promise<Location | nu
       id: response.id,
       _id: (response as any).properties._id?.number || 0,
       notionPageId: response.id,
-      name: (response as any).properties.location_name.rich_text[0]?.plain_text || "",
+      name: (response as any).properties.location_name.title[0]?.plain_text || "",
       address: (response as any).properties.address.rich_text[0]?.plain_text || "",
       map_url: (response as any).properties.map_url?.url || undefined,
       category: (response as any).properties.category?.select?.name || "",
@@ -121,7 +121,7 @@ export async function createLocation({
           number: newId,
         },
         location_name: {
-          rich_text: [
+          title: [
             {
               text: {
                 content: locationName,

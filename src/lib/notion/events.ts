@@ -83,7 +83,7 @@ export async function getLocation(locationId: string) {
     return {
       id: response.id,
       notionPageId: response.id,
-      name: (response as any).properties.location_name.rich_text[0]?.plain_text || "",
+      name: (response as any).properties.title.title[0]?.plain_text || "",
       address: (response as any).properties.address.rich_text[0]?.plain_text || "",
       map_url: (response as any).properties.map_url?.url || undefined,
     };
@@ -136,6 +136,17 @@ export async function createEvent(
     const maxId = await getMaxEventId();
     const newId = maxId + 1;
 
+    // 場所の情報を取得
+    const location = await getLocationById(locationId);
+    if (!location) {
+      throw new Error("Location not found");
+    }
+
+    // 日付をフォーマット
+    const date = new Date(startDate);
+    const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+    const title = `${formattedDate}${location.name}`;
+
     // イベントを作成
     const response = await notion.pages.create({
       parent: {
@@ -144,6 +155,15 @@ export async function createEvent(
       properties: {
         _id: {
           number: newId,
+        },
+        title: {
+          title: [
+            {
+              text: {
+                content: title,
+              },
+            },
+          ],
         },
         event_date: {
           date: {
@@ -160,13 +180,6 @@ export async function createEvent(
         },
       },
     });
-
-    // 作成したイベントの情報を取得
-    const location = await getLocationById(locationId);
-
-    if (!location) {
-      throw new Error("Location not found");
-    }
 
     return {
       id: response.id,

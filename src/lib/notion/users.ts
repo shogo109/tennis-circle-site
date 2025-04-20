@@ -19,8 +19,8 @@ export async function getUser(username: string) {
     // 全ユーザーの中からスペースを無視して一致するものを探す
     const user = response.results.find((page) => {
       const pageUser = page as PageObjectResponse;
-      const nameProperty = pageUser.properties.name as { rich_text: RichTextItemResponse[] };
-      const notionUsername = nameProperty.rich_text[0]?.plain_text || "";
+      const nameProperty = pageUser.properties.name as { title: RichTextItemResponse[] };
+      const notionUsername = nameProperty.title[0]?.plain_text || "";
       const normalizedNotionUsername = notionUsername.replace(/\s+/g, "");
       return normalizedNotionUsername === normalizedInputUsername;
     });
@@ -30,14 +30,14 @@ export async function getUser(username: string) {
     }
 
     const pageUser = user as PageObjectResponse;
-    const nameProperty = pageUser.properties.name as { rich_text: RichTextItemResponse[] };
+    const nameProperty = pageUser.properties.name as { title: RichTextItemResponse[] };
     const idProperty = pageUser.properties._id as { number: number };
     const adminProperty = pageUser.properties.admin as { number: number };
 
     return {
       id: user.id,
       _id: idProperty?.number || 0,
-      name: nameProperty.rich_text[0]?.plain_text || "",
+      name: nameProperty.title[0]?.plain_text || "",
       admin: adminProperty?.number === 1,
     };
   } catch (error) {
