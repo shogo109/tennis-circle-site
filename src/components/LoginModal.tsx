@@ -11,6 +11,7 @@ interface LoginModalProps {
 interface UserInfo {
   _id: string;
   name: string;
+  display_name: string;
   admin: boolean;
 }
 
@@ -48,6 +49,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
       const userInfo: UserInfo = {
         _id: data._id,
         name: data.name,
+        display_name: data.display_name,
         admin: data.admin,
       };
 

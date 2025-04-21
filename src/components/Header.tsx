@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import LoginModal from "./LoginModal";
+import UserEditModal from "./UserEditModal";
+import UserAvatar from "./UserAvatar";
 import { useRouter } from "next/navigation";
 
 interface UserInfo {
   _id: string;
   name: string;
+  display_name: string;
   admin: boolean;
 }
 
@@ -15,8 +18,11 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isUserEditModalOpen, setIsUserEditModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -31,7 +37,9 @@ export default function Header() {
         const decodedData = atob(userInfoStr);
         const userInfo: UserInfo = JSON.parse(decodeURIComponent(decodedData));
         setUsername(userInfo.name);
+        setDisplayName(userInfo.display_name ? userInfo.display_name.trim() : userInfo.name);
         setIsLoggedIn(true);
+        setIsAdmin(userInfo.admin);
       } catch (error) {
         console.error("Error parsing user info:", error);
         handleLogout();
@@ -42,16 +50,66 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const fetchLatestUserInfo = useCallback(async () => {
+    const userInfoStr = sessionStorage.getItem("userInfo");
+    if (!userInfoStr) return;
+
+    try {
+      const decodedData = atob(userInfoStr);
+      const userInfo = JSON.parse(decodeURIComponent(decodedData));
+
+      // Notionから最新のユーザー情報を取得
+      const response = await fetch(`/api/users/${userInfo.name}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch user info");
+      }
+
+      const latestUserInfo = await response.json();
+
+      // セッションストレージを更新
+      const updatedUserInfo = {
+        ...userInfo,
+        name: latestUserInfo.username,
+        display_name: latestUserInfo.display_name,
+      };
+      sessionStorage.setItem("userInfo", btoa(encodeURIComponent(JSON.stringify(updatedUserInfo))));
+
+      // 状態を更新
+      setUsername(latestUserInfo.username);
+      setDisplayName(latestUserInfo.display_name || latestUserInfo.username);
+    } catch (error) {
+      console.error("Error fetching latest user info:", error);
+    }
+  }, []);
+
   const handleLogin = (username: string) => {
-    setUsername(username);
-    setIsLoggedIn(true);
+    // セッションストレージから最新のユーザー情報を取得
+    const userInfoStr = sessionStorage.getItem("userInfo");
+    if (userInfoStr) {
+      try {
+        const decodedData = atob(userInfoStr);
+        const userInfo: UserInfo = JSON.parse(decodeURIComponent(decodedData));
+        setUsername(userInfo.name);
+        setDisplayName(userInfo.display_name ? userInfo.display_name.trim() : userInfo.name);
+        setIsLoggedIn(true);
+        setIsAdmin(userInfo.admin);
+      } catch (error) {
+        console.error("Error parsing user info in handleLogin:", error);
+      }
+    }
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem("userInfo");
     setUsername("");
+    setDisplayName("");
     setIsLoggedIn(false);
+    setIsAdmin(false);
     router.push("/");
+  };
+
+  const handleUserUpdate = async (newUsername: string, newDisplayName: string) => {
+    await fetchLatestUserInfo();
   };
 
   return (
@@ -100,6 +158,14 @@ export default function Header() {
                   出欠確認
                 </Link>
               )}
+              {isLoggedIn && isAdmin && (
+                <Link
+                  href="/users"
+                  className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-tennis-court transition-colors"
+                >
+                  ユーザー一覧
+                </Link>
+              )}
               <Link
                 href="#features"
                 className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-tennis-court transition-colors"
@@ -114,10 +180,20 @@ export default function Header() {
               </Link>
               {isLoggedIn ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm font-medium text-tennis-court">{username}さん</span>
+                  <button
+                    onClick={() => setIsUserEditModalOpen(true)}
+                    className="text-sm font-medium text-tennis-court hover:text-tennis-court/80 whitespace-nowrap flex items-center gap-1 hover:bg-tennis-court/5 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    <UserAvatar
+                      displayName={displayName}
+                      size="sm"
+                      isButton={false}
+                    />
+                    <span>{displayName}さん</span>
+                  </button>
                   <button
                     onClick={handleLogout}
-                    className="text-sm text-gray-600 hover:text-gray-800"
+                    className="text-sm text-gray-600 hover:text-gray-800 whitespace-nowrap"
                   >
                     ログアウト
                   </button>
@@ -141,11 +217,11 @@ export default function Header() {
             {/* モバイルメニューボタン */}
             <div className="md:hidden flex items-center gap-2">
               {isLoggedIn && (
-                <div className="w-8 h-8 rounded-full bg-tennis-court/10 flex items-center justify-center">
-                  <span className="text-sm font-medium text-tennis-court">
-                    {username.charAt(0)}
-                  </span>
-                </div>
+                <UserAvatar
+                  displayName={displayName}
+                  onClick={() => setIsUserEditModalOpen(true)}
+                  isButton={true}
+                />
               )}
               <button
                 type="button"
@@ -194,6 +270,22 @@ export default function Header() {
           } md:hidden bg-white/95 backdrop-blur-md border-t border-tennis-court/10`}
         >
           <div className="container py-2 space-y-1">
+            {isLoggedIn && (
+              <button
+                onClick={() => {
+                  setIsUserEditModalOpen(true);
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-2 w-full text-left text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
+              >
+                <UserAvatar
+                  displayName={displayName}
+                  size="sm"
+                  isButton={false}
+                />
+                <span>{displayName}さん - プロフィール編集</span>
+              </button>
+            )}
             <Link
               href="/schedule"
               onClick={() => setIsMenuOpen(false)}
@@ -215,6 +307,15 @@ export default function Header() {
                 className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
               >
                 出欠確認
+              </Link>
+            )}
+            {isLoggedIn && isAdmin && (
+              <Link
+                href="/users"
+                onClick={() => setIsMenuOpen(false)}
+                className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
+              >
+                ユーザー一覧
               </Link>
             )}
             <Link
@@ -266,6 +367,13 @@ export default function Header() {
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onLogin={handleLogin}
+      />
+      <UserEditModal
+        isOpen={isUserEditModalOpen}
+        onClose={() => setIsUserEditModalOpen(false)}
+        onUpdate={handleUserUpdate}
+        currentDisplayName={displayName}
+        username={username}
       />
     </div>
   );

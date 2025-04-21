@@ -15,14 +15,16 @@ interface Props {
 }
 
 interface UserInfo {
+  userId: string; // NotionのページID
+  _id: number; // 数値のID
   username: string;
-  userId: string;
-  notionUserId?: string;
+  display_name?: string;
 }
 
 interface User {
   id: string;
   username: string;
+  display_name?: string;
 }
 
 // 日付フォーマット関数をコンポーネント内で定義
@@ -102,7 +104,18 @@ export default function AttendanceClient({}: Props) {
   const fetchUsers = async () => {
     try {
       setIsLoadingUsers(true);
-      const response = await fetch("/api/users");
+      const encodedData = sessionStorage.getItem("userInfo");
+      if (!encodedData) {
+        throw new Error("ユーザー情報が見つかりません");
+      }
+
+      const response = await fetch("/api/users", {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-user": encodedData,
+        },
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.details || "Failed to fetch users");
@@ -137,32 +150,49 @@ export default function AttendanceClient({}: Props) {
       try {
         const decodedData = JSON.parse(decodeURIComponent(atob(encodedData)));
 
-        // まず基本的なユーザー情報をセット
+        // まずセッションストレージの情報をセット
         const initialUserInfo = {
-          userId: decodedData._id.toString(),
+          _id: decodedData._id,
+          userId: "", // 後でNotionのページIDを設定
           username: decodedData.name,
-          notionUserId: undefined,
+          display_name: decodedData.display_name,
         };
         setUserInfo(initialUserInfo);
 
-        // Notionユーザー情報を取得
+        // Notionユーザー情報を取得してIDを更新
         try {
-          const response = await fetch("/api/users");
+          const response = await fetch("/api/users", {
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              "x-auth-user": encodedData,
+            },
+          });
+
           if (!response.ok) {
-            throw new Error("Failed to fetch users");
+            const errorData = await response
+              .json()
+              .catch((e) => ({ error: "レスポンスの解析に失敗しました" }));
+            throw new Error(`Failed to fetch users: ${errorData.error || response.statusText}`);
           }
+
           const users = await response.json();
 
-          // 現在のユーザーのNotionユーザーIDを探す
-          const currentUser = users.find((user) => user.username === decodedData.name);
-          if (currentUser?.notionUserId) {
+          // 現在のユーザーのNotionページIDを探す
+          const currentUser = users.find((user: any) => user._id === decodedData._id);
+
+          if (currentUser?.id) {
             setUserInfo((prev) => ({
               ...prev,
-              notionUserId: currentUser.id,
+              userId: currentUser.id,
+              display_name: currentUser.display_name,
+              username: currentUser.username,
             }));
+          } else {
+            throw new Error("ユーザー情報が見つかりません");
           }
         } catch (error) {
-          console.error("Error fetching user info");
+          console.error("Error fetching user info:", error);
         }
       } catch (error) {
         console.error("Error processing user info");
@@ -176,7 +206,7 @@ export default function AttendanceClient({}: Props) {
   const handleAttendanceUpdate = async (eventId: string, status: AttendanceStatus) => {
     setIsUpdating(eventId);
     try {
-      if (!userInfo || !userInfo.notionUserId) {
+      if (!userInfo?.userId) {
         throw new Error("ユーザー情報が見つかりません");
       }
 
@@ -187,7 +217,7 @@ export default function AttendanceClient({}: Props) {
         },
         body: JSON.stringify({
           eventId,
-          userId: userInfo.notionUserId,
+          userId: userInfo.userId,
           status,
           memo: attendanceMemo.trim() || undefined,
         }),
@@ -204,9 +234,7 @@ export default function AttendanceClient({}: Props) {
         prevEvents.map((event) => {
           if (event.id === eventId) {
             const updatedAttendances = event.attendances || [];
-            const existingIndex = updatedAttendances.findIndex(
-              (a) => a.userId === userInfo.notionUserId
-            );
+            const existingIndex = updatedAttendances.findIndex((a) => a.userId === userInfo.userId);
 
             if (existingIndex >= 0) {
               updatedAttendances[existingIndex] = {
@@ -216,8 +244,8 @@ export default function AttendanceClient({}: Props) {
               };
             } else {
               updatedAttendances.push({
-                userId: userInfo.notionUserId,
-                userName: userInfo.username,
+                userId: userInfo.userId,
+                userName: userInfo.display_name || userInfo.username,
                 status: updatedAttendance.status,
                 memo: updatedAttendance.memo,
               });
@@ -315,9 +343,7 @@ export default function AttendanceClient({}: Props) {
       ) : (
         <div className="space-y-4">
           {events.map((event) => {
-            const userAttendance = event.attendances?.find(
-              (a) => a.userId === userInfo?.notionUserId
-            );
+            const userAttendance = event.attendances?.find((a) => a.userId === userInfo?.userId);
             const isEventUpdating = isUpdating === event.id;
 
             return (
@@ -452,7 +478,7 @@ export default function AttendanceClient({}: Props) {
                       return (
                         <tr key={user.id}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 w-32">
-                            {user.username}
+                            {user.display_name?.trim() || user.username}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center w-24">
                             <div className="flex justify-center">

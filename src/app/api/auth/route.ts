@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       _id: user._id,
       name: user.name,
+      display_name: user.display_name,
       admin: user.admin,
     });
   } catch (error) {
