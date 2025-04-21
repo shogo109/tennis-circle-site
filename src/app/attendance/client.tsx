@@ -62,7 +62,31 @@ export default function AttendanceClient({}: Props) {
           throw new Error("Failed to fetch events");
         }
         const data = await response.json();
-        setEvents(data);
+
+        // 現在の月と次の月のイベントのみをフィルタリング
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+        const nextMonthYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+
+        const filteredEvents = data.filter((event: Event) => {
+          const eventDate = new Date(event.startDate);
+          const eventMonth = eventDate.getMonth();
+          const eventYear = eventDate.getFullYear();
+
+          return (
+            (eventMonth === currentMonth && eventYear === currentYear) ||
+            (eventMonth === nextMonth && eventYear === nextMonthYear)
+          );
+        });
+
+        // 日付でソート
+        filteredEvents.sort(
+          (a: Event, b: Event) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        );
+
+        setEvents(filteredEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
         setIsError(true);

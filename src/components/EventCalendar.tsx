@@ -1,7 +1,18 @@
 "use client";
 
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import {
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  isSameMonth,
+  isAfter,
+  isBefore,
+} from "date-fns";
 import { ja } from "date-fns/locale";
 import "@/styles/calendar.css";
 import { Event } from "@/types/event";
@@ -9,6 +20,7 @@ import { useMemo, useState, useEffect } from "react";
 import EventModal from "./EventModal";
 import EventRegistrationModal from "./EventRegistrationModal";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
 const locales = {
   ja: ja,
@@ -44,6 +56,12 @@ export default function EventCalendar({ events: initialEvents }: Props) {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [events, setEvents] = useState(initialEvents);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  // 現在の月を基準に、表示可能な範囲を計算
+  const today = useMemo(() => startOfMonth(new Date()), []);
+  const minDate = useMemo(() => startOfMonth(subMonths(today, 1)), [today]);
+  const maxDate = useMemo(() => startOfMonth(addMonths(today, 1)), [today]);
 
   useEffect(() => {
     // ユーザーの管理者権限を確認
@@ -95,6 +113,9 @@ export default function EventCalendar({ events: initialEvents }: Props) {
   const messages = {
     noEventsInRange: "この期間に予定はありません",
     showMore: (total: number) => `他${total}件`,
+    previous: "前月",
+    next: "翌月",
+    today: "今月",
   };
 
   const handleSelectEvent = (calendarEvent: any) => {
@@ -119,10 +140,21 @@ export default function EventCalendar({ events: initialEvents }: Props) {
     return {};
   };
 
+  const handleNavigate = (newDate: Date) => {
+    const newMonth = startOfMonth(newDate);
+    // 範囲内の日付であれば更新
+    if (
+      (isSameMonth(newMonth, minDate) || isAfter(newMonth, minDate)) &&
+      (isSameMonth(newMonth, maxDate) || isBefore(newMonth, maxDate))
+    ) {
+      setCurrentDate(newDate);
+    }
+  };
+
   return (
     <>
       <div className="h-[600px] md:h-[800px] font-sans relative">
-        <div className="absolute -top-2 right-0 z-10">
+        <div className="absolute top-8 right-0 z-10">
           {isAdmin && (
             <button
               onClick={() => setIsRegistrationModalOpen(true)}
@@ -142,6 +174,8 @@ export default function EventCalendar({ events: initialEvents }: Props) {
           messages={messages}
           views={["month"]}
           defaultView="month"
+          date={currentDate}
+          onNavigate={handleNavigate}
           tooltipAccessor={(event) => `${event.title}\n${format(event.start, "yyyy/MM/dd")}`}
           className="bg-white rounded-lg shadow-sm"
           dayPropGetter={customDayPropGetter}
@@ -151,13 +185,52 @@ export default function EventCalendar({ events: initialEvents }: Props) {
           onSelectEvent={handleSelectEvent}
           popup
           components={{
-            toolbar: (props) => (
-              <div className="rbc-toolbar bg-primary-50 p-3 rounded-t-lg">
-                <span className="text-lg font-bold text-center w-full">
-                  {format(props.date, "yyyy年M月", { locale: ja })}
-                </span>
-              </div>
-            ),
+            toolbar: (props) => {
+              const currentMonth = startOfMonth(props.date);
+              // 現在の表示月が範囲内かどうかをチェック
+              const isPrevDisabled = isBefore(currentMonth, minDate);
+              const isNextDisabled = isAfter(currentMonth, maxDate);
+
+              return (
+                <div className="rbc-toolbar bg-primary-50 rounded-t-lg -mt-2">
+                  <div className="flex justify-between items-center py-0.5 px-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => props.onNavigate("PREV")}
+                        className={`p-1 rounded ${
+                          isPrevDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
+                        }`}
+                        disabled={isPrevDisabled}
+                        aria-label="前月"
+                      >
+                        <ChevronLeftIcon className="h-5 w-5 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => props.onNavigate("TODAY")}
+                        className="px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded"
+                      >
+                        今月
+                      </button>
+                      <button
+                        onClick={() => props.onNavigate("NEXT")}
+                        className={`p-1 rounded ${
+                          isNextDisabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"
+                        }`}
+                        disabled={isNextDisabled}
+                        aria-label="翌月"
+                      >
+                        <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex justify-center py-1.5">
+                    <span className="text-lg font-bold">
+                      {format(props.date, "yyyy年M月", { locale: ja })}
+                    </span>
+                  </div>
+                </div>
+              );
+            },
           }}
         />
       </div>

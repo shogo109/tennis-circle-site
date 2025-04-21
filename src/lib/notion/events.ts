@@ -19,8 +19,29 @@ export async function getEvents(): Promise<Event[]> {
   }
 
   try {
+    // 現在の月の初日と最終日を取得
+    const today = new Date();
+    const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+
     const response = await notion.databases.query({
       database_id: process.env.NOTION_EVENTS_DATABASE_ID,
+      filter: {
+        and: [
+          {
+            property: "event_date",
+            date: {
+              on_or_after: prevMonth.toISOString().split("T")[0],
+            },
+          },
+          {
+            property: "event_date",
+            date: {
+              on_or_before: nextMonthEnd.toISOString().split("T")[0],
+            },
+          },
+        ],
+      },
       sorts: [
         {
           property: "event_date",
