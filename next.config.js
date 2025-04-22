@@ -15,7 +15,9 @@ const nextConfig = {
         hostname: "images.unsplash.com",
       },
     ],
+    domains: ["images.unsplash.com"],
   },
+  output: "standalone",
 };
 
 module.exports = withPWA(nextConfig);
