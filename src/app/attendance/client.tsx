@@ -313,6 +313,18 @@ export default function AttendanceClient({}: Props) {
     setIsChangeModalOpen(true);
   };
 
+  useEffect(() => {
+    if (isModalOpen || isChangeModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isModalOpen, isChangeModalOpen]);
+
   // eventsがnullの場合はローディング中
   if (events === null) {
     throw new Error("loading");
@@ -435,8 +447,8 @@ export default function AttendanceClient({}: Props) {
 
       {/* 詳細モーダル */}
       {isModalOpen && selectedEvent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl mx-4">
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto p-4">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl mx-auto my-8">
             <div className="mb-6">
               <h2 className="text-xl font-bold">参加者一覧</h2>
               <div className="text-lg font-medium mt-2">
@@ -455,7 +467,7 @@ export default function AttendanceClient({}: Props) {
                 <p className="text-gray-600">ユーザー情報を読み込み中...</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-[60vh]">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
