@@ -20,8 +20,17 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-tennis-court/80 to-primary-600/80" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full border-4 border-tennis-ball/30 flex items-center justify-center bg-tennis-court/20 backdrop-blur-sm">
-            <span className="text-6xl">🎾</span>
+          <div className="relative w-32 h-32">
+            {/* アニメーションする円 1 */}
+            <div className="absolute inset-0 rounded-full border-8 border-tennis-ball/70 animate-ping-slow" />
+            {/* アニメーションする円 2 (少し遅延) */}
+            <div className="absolute inset-0 rounded-full border-8 border-tennis-ball/60 animate-ping-slower" />
+            {/* メインのテニスボール */}
+            <div className="relative w-full h-full rounded-full flex items-center justify-center bg-tennis-court/20 backdrop-blur-sm">
+              <div className="animate-float-random">
+                <span className="block text-6xl animate-spin-slow">🎾</span>
+              </div>
+            </div>
           </div>
         </div>
         <div className="relative h-full flex flex-col items-center justify-center text-white px-4">
@@ -34,7 +43,7 @@ export default function Home() {
           <p className="text-lg text-center mb-8 text-tennis-line/90 drop-shadow-md">
             JOY（喜び）× JOin（仲間になる）
           </p>
-          <div className="space-y-4">
+          <div className="space-y-4 mt-16">
             <Link
               href="/schedule"
               className="block bg-accent-500 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-accent-600 transition-colors text-center"
