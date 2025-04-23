@@ -167,10 +167,10 @@ export default function Header() {
                 </Link>
               )}
               <Link
-                href="#features"
+                href="/about"
                 className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-tennis-court transition-colors"
               >
-                特徴
+                サークルについて
               </Link>
               <Link
                 href="#contact"
@@ -319,11 +319,11 @@ export default function Header() {
               </Link>
             )}
             <Link
-              href="#features"
+              href="/about"
               onClick={() => setIsMenuOpen(false)}
               className="block text-gray-600 hover:text-tennis-court hover:bg-tennis-court/5 px-4 py-2 text-sm font-medium transition-colors rounded-lg"
             >
-              特徴
+              サークルについて
             </Link>
             <Link
               href="#contact"
