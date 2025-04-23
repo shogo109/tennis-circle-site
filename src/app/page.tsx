@@ -28,18 +28,21 @@ export default function Home() {
           <h1 className="text-5xl font-bold text-center mb-4 tracking-tight text-tennis-line drop-shadow-lg">
             Joy'n Tennis
           </h1>
-          <p className="text-xl text-center mb-8 text-tennis-line/90 drop-shadow-md">
-            名古屋で楽しくテニス！
+          <p className="text-xl text-center mb-4 text-tennis-line/90 drop-shadow-md">
+            一宮市・稲沢市を中心に活動中！
+          </p>
+          <p className="text-lg text-center mb-8 text-tennis-line/90 drop-shadow-md">
+            JOY（喜び）× JOin（仲間になる）
           </p>
           <div className="space-y-4">
             <Link
-              href="/locations"
+              href="/schedule"
               className="block bg-accent-500 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-accent-600 transition-colors text-center"
             >
-              開催場所を確認
+              開催予定を確認
             </Link>
             <Link
-              href="#features"
+              href="#about"
               className="block bg-tennis-court/20 backdrop-blur-sm text-tennis-line px-8 py-4 rounded-xl font-bold hover:bg-tennis-court/30 transition-colors text-center border-2 border-tennis-line/30"
             >
               サークルについて
@@ -48,36 +51,185 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 特徴セクション */}
+      {/* サークル紹介セクション */}
       <section
-        id="features"
+        id="about"
         className="px-4 py-16 bg-gradient-to-b from-primary-50 to-white"
       >
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">
+            Joy'n Tennis とは
+          </h2>
+          <p className="text-center text-gray-600 mb-12">
+            『一緒にテニスを楽しみたい』という思いが込められた造語です
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-tennis-court/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">👥</span>
+                </div>
+                <h3 className="text-xl font-bold text-tennis-court">メンバー構成</h3>
+              </div>
+              <ul className="space-y-3 list-disc pl-5 text-gray-700">
+                <li>現在35名前後が在籍</li>
+                <li>20代後半～40代前半の社会人が中心</li>
+                <li>初心者から元部活生まで幅広いレベル</li>
+              </ul>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-tennis-court/10 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">⏰</span>
+                </div>
+                <h3 className="text-xl font-bold text-tennis-court">活動内容</h3>
+              </div>
+              <ul className="space-y-3 list-disc pl-5 text-gray-700">
+                <li>1回4時間の充実した活動</li>
+                <li>半分練習・半分試合のバランスの良い内容</li>
+                <li>1面5～8名でたくさんボールが打てる</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="bg-tennis-court/5 backdrop-blur-sm p-6 md:p-8 rounded-2xl">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                <span className="text-2xl">📍</span>
+              </div>
+              <h3 className="text-xl font-bold text-tennis-court">活動場所・頻度</h3>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3 text-tennis-court">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span className="font-bold">活動エリア</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm bg-tennis-court/10 px-3 py-1 rounded-full">
+                      一宮市
+                    </span>
+                    <span className="text-sm bg-tennis-court/10 px-3 py-1 rounded-full">
+                      稲沢市
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    人工芝のテニスコートを中心に活動しています
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3 text-tennis-court">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="font-bold">活動頻度</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-sm bg-tennis-court/10 px-3 py-1 rounded-full">
+                      土曜日
+                    </span>
+                    <span className="text-sm bg-tennis-court/10 px-3 py-1 rounded-full">
+                      日曜日
+                    </span>
+                    <span className="text-sm bg-accent-500/10 text-accent-600 px-3 py-1 rounded-full">
+                      平日ナイター
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">週1～2回、4時間の充実した活動</p>
+                </div>
+              </div>
+
+              <div className="md:col-span-2 bg-gradient-to-r from-tennis-court/5 to-accent-500/5 rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-3 text-tennis-court">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="font-bold">活動の特徴</span>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">
+                    テニススクールよりも多くボールを打てると好評です。
+                    初参加の方も気兼ねなく楽しめる雰囲気づくりを心がけています。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 特徴セクション */}
+      <section className="px-4 py-16 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">サークルの特徴</h2>
           <p className="text-center text-gray-600 mb-12">楽しく、安全に、みんなでテニス</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
               title="初心者歓迎"
-              description="基礎からしっかりサポート。経験者から丁寧にアドバイスが受けられます。"
+              description="年齢、性別、テニスレベルの制約なし。初めてラケットを握る方から、元部活生まで、誰でも参加できます。"
               icon="🎾"
             />
             <FeatureCard
-              title="フレキシブルな開催"
-              description="予約可能なコートで随時開催。参加したい時に気軽に参加できます。"
-              icon="📅"
+              title="充実した活動"
+              description="練習と試合をバランスよく実施。テニススクールよりも多くボールを打てると好評です。"
+              icon="🏸"
             />
             <FeatureCard
-              title="充実した設備"
-              description="人工芝コートで快適にプレー。雨天時は室内コートを利用します。"
-              icon="🏸"
+              title="フレンドリーな雰囲気"
+              description="初参加でも気兼ねなく楽しめる雰囲気です。テニスを通じて自然と笑顔が生まれる環境です。"
+              icon="😊"
             />
           </div>
         </div>
       </section>
 
       {/* 参加方法セクション */}
-      <section className="px-4 py-16 bg-white">
+      <section className="px-4 py-16 bg-gradient-to-b from-white to-primary-50">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">参加方法</h2>
           <p className="text-center text-gray-600 mb-12">簡単3ステップで参加できます</p>
@@ -86,36 +238,51 @@ export default function Home() {
               number={1}
               title="開催予定を確認"
               description={
-                <Link
-                  href="/schedule"
-                  className="text-accent-500 hover:text-accent-600 underline"
-                >
-                  カレンダーから開催日を確認
-                </Link>
+                <>
+                  <Link
+                    href="/schedule"
+                    className="text-accent-500 hover:text-accent-600 underline"
+                  >
+                    カレンダーから開催日を確認
+                  </Link>
+                  <span className="block text-sm text-gray-500 mt-1">
+                    土日を中心に、平日ナイターでも開催しています
+                  </span>
+                </>
               }
             />
             <Step
               number={2}
               title="開催場所を確認"
               description={
-                <Link
-                  href="/locations"
-                  className="text-accent-500 hover:text-accent-600 underline"
-                >
-                  活動場所の詳細をチェック
-                </Link>
+                <>
+                  <Link
+                    href="/locations"
+                    className="text-accent-500 hover:text-accent-600 underline"
+                  >
+                    活動場所の詳細をチェック
+                  </Link>
+                  <span className="block text-sm text-gray-500 mt-1">
+                    一宮市・稲沢市の人工芝コートを中心に活動しています
+                  </span>
+                </>
               }
             />
             <Step
               number={3}
               title="フォームから申し込み"
               description={
-                <Link
-                  href="/apply"
-                  className="text-accent-500 hover:text-accent-600 underline"
-                >
-                  必要事項を入力して完了
-                </Link>
+                <>
+                  <Link
+                    href="/apply"
+                    className="text-accent-500 hover:text-accent-600 underline"
+                  >
+                    必要事項を入力して完了
+                  </Link>
+                  <span className="block text-sm text-gray-500 mt-1">
+                    初心者の方も気軽にご参加いただけます
+                  </span>
+                </>
               }
             />
           </div>

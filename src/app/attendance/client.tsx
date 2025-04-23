@@ -459,6 +459,44 @@ export default function AttendanceClient({}: Props) {
                   ? selectedEvent.location
                   : selectedEvent.location.name}
               </div>
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-tennis-court/10 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-5 w-5 text-tennis-court" />
+                    <span className="text-sm font-medium text-gray-600">参加</span>
+                  </div>
+                  <div className="text-2xl font-bold text-tennis-court mt-1">
+                    {selectedEvent.attendances?.filter((a) => a.status === "going").length || 0}
+                  </div>
+                </div>
+                <div className="bg-red-500/10 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <XCircleIcon className="h-5 w-5 text-red-500" />
+                    <span className="text-sm font-medium text-gray-600">不参加</span>
+                  </div>
+                  <div className="text-2xl font-bold text-red-500 mt-1">
+                    {selectedEvent.attendances?.filter((a) => a.status === "not_going").length || 0}
+                  </div>
+                </div>
+                <div className="bg-yellow-500/10 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <QuestionMarkCircleIcon className="h-5 w-5 text-yellow-500" />
+                    <span className="text-sm font-medium text-gray-600">検討中</span>
+                  </div>
+                  <div className="text-2xl font-bold text-yellow-500 mt-1">
+                    {selectedEvent.attendances?.filter((a) => a.status === "maybe").length || 0}
+                  </div>
+                </div>
+                <div className="bg-gray-100 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-5 rounded-full border-2 border-gray-400" />
+                    <span className="text-sm font-medium text-gray-600">未回答</span>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-400 mt-1">
+                    {users.length - (selectedEvent.attendances?.length || 0)}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {isLoadingUsers ? (
