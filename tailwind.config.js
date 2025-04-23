@@ -97,6 +97,36 @@ module.exports = {
             transform: "translate(10px, 10px)",
           },
         },
+        "slide-up-fade": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        "slide-in-right": {
+          "0%": {
+            opacity: "0",
+            transform: "translateX(20px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
+        "scale-up": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0.95)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+        },
       },
       animation: {
         fade: "fade 0.3s ease-in-out",
@@ -104,6 +134,11 @@ module.exports = {
         "ping-slower": "ping-slower 3s cubic-bezier(0, 0, 0.2, 1) infinite 1.5s",
         "spin-slow": "spin-slow 12s linear infinite",
         "float-random": "float-random 8s ease-in-out infinite",
+        "slide-up": "slide-up-fade 0.6s ease-out forwards",
+        "slide-up-delay-1": "slide-up-fade 0.6s ease-out 0.1s forwards",
+        "slide-up-delay-2": "slide-up-fade 0.6s ease-out 0.2s forwards",
+        "slide-in-right": "slide-in-right 0.6s ease-out forwards",
+        "scale-up": "scale-up 0.4s ease-out forwards",
       },
     },
   },

@@ -2,6 +2,61 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useRef, ReactNode } from "react";
+
+// スクロールアニメーション用のコンポーネント
+function AnimateOnScroll({
+  children,
+  className,
+  animation = "animate-slide-up",
+  delay = 0,
+  margin = "-25% 0px",
+}: {
+  children: ReactNode;
+  className?: string;
+  animation?: string;
+  delay?: number;
+  margin?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // 要素が表示範囲に入ったらアニメーションクラスを適用
+          setTimeout(() => {
+            entry.target.classList.add(...animation.split(" "));
+          }, delay);
+          observer.unobserve(entry.target);
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: margin,
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, [animation, delay, margin]);
+
+  return (
+    <div
+      ref={ref}
+      className={`opacity-0 ${className || ""}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -66,15 +121,25 @@ export default function Home() {
         className="px-4 py-16 bg-gradient-to-b from-primary-50 to-white"
       >
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">
-            Joy'n Tennis とは
-          </h2>
-          <p className="text-center text-gray-600 mb-12">
-            『一緒にテニスを楽しみたい』という思いが込められた造語です
-          </p>
+          <AnimateOnScroll animation="animate-slide-up">
+            <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">
+              Joy'n Tennis とは
+            </h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll
+            animation="animate-slide-up"
+            delay={100}
+          >
+            <p className="text-center text-gray-600 mb-12">
+              『一緒にテニスを楽しみたい』という思いが込められた造語です
+            </p>
+          </AnimateOnScroll>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <AnimateOnScroll
+              className="bg-white p-6 rounded-2xl shadow-lg"
+              animation="animate-slide-up"
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-tennis-court/10 rounded-xl flex items-center justify-center">
                   <span className="text-2xl">👥</span>
@@ -86,9 +151,13 @@ export default function Home() {
                 <li>20代後半～40代前半の社会人が中心</li>
                 <li>初心者から元部活生まで幅広いレベル</li>
               </ul>
-            </div>
+            </AnimateOnScroll>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <AnimateOnScroll
+              className="bg-white p-6 rounded-2xl shadow-lg"
+              animation="animate-slide-up"
+              delay={200}
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-tennis-court/10 rounded-xl flex items-center justify-center">
                   <span className="text-2xl">⏰</span>
@@ -100,10 +169,14 @@ export default function Home() {
                 <li>半分練習・半分試合のバランスの良い内容</li>
                 <li>1面5～8名でたくさんボールが打てる</li>
               </ul>
-            </div>
+            </AnimateOnScroll>
           </div>
 
-          <div className="bg-tennis-court/5 backdrop-blur-sm p-6 md:p-8 rounded-2xl">
+          <AnimateOnScroll
+            className="bg-tennis-court/5 backdrop-blur-sm p-6 md:p-8 rounded-2xl"
+            animation="animate-slide-up"
+            delay={400}
+          >
             <div className="flex items-center gap-3 mb-8">
               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
                 <span className="text-2xl">📍</span>
@@ -208,31 +281,55 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* 特徴セクション */}
       <section className="px-4 py-16 bg-white">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">サークルの特徴</h2>
-          <p className="text-center text-gray-600 mb-12">楽しく、安全に、みんなでテニス</p>
+          <AnimateOnScroll animation="animate-slide-up">
+            <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">
+              サークルの特徴
+            </h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll
+            animation="animate-slide-up"
+            delay={100}
+          >
+            <p className="text-center text-gray-600 mb-12">楽しく、安全に、みんなでテニス</p>
+          </AnimateOnScroll>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard
-              title="初心者歓迎"
-              description="年齢、性別、テニスレベルの制約なし。初めてラケットを握る方から、元部活生まで、誰でも参加できます。"
-              icon="🎾"
-            />
-            <FeatureCard
-              title="充実した活動"
-              description="練習と試合をバランスよく実施。テニススクールよりも多くボールを打てると好評です。"
-              icon="🏸"
-            />
-            <FeatureCard
-              title="フレンドリーな雰囲気"
-              description="初参加でも気兼ねなく楽しめる雰囲気です。テニスを通じて自然と笑顔が生まれる環境です。"
-              icon="😊"
-            />
+            <AnimateOnScroll
+              animation="animate-slide-up"
+              delay={200}
+            >
+              <FeatureCard
+                title="初心者歓迎"
+                description="年齢、性別、テニスレベルの制約なし。初めてラケットを握る方から、元部活生まで、誰でも参加できます。"
+                icon="🎾"
+              />
+            </AnimateOnScroll>
+            <AnimateOnScroll
+              animation="animate-slide-up"
+              delay={400}
+            >
+              <FeatureCard
+                title="充実した活動"
+                description="練習と試合をバランスよく実施。テニススクールよりも多くボールを打てると好評です。"
+                icon="🏸"
+              />
+            </AnimateOnScroll>
+            <AnimateOnScroll
+              animation="animate-slide-up"
+              delay={600}
+            >
+              <FeatureCard
+                title="フレンドリーな雰囲気"
+                description="初参加でも気兼ねなく楽しめる雰囲気です。テニスを通じて自然と笑顔が生まれる環境です。"
+                icon="😊"
+              />
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
@@ -240,60 +337,82 @@ export default function Home() {
       {/* 参加方法セクション */}
       <section className="px-4 py-16 bg-gradient-to-b from-white to-primary-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">参加方法</h2>
-          <p className="text-center text-gray-600 mb-12">簡単3ステップで参加できます</p>
+          <AnimateOnScroll animation="animate-slide-up">
+            <h2 className="text-3xl font-bold text-center mb-2 text-tennis-court">参加方法</h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll
+            animation="animate-slide-up"
+            delay={100}
+          >
+            <p className="text-center text-gray-600 mb-12">簡単3ステップで参加できます</p>
+          </AnimateOnScroll>
           <div className="max-w-3xl mx-auto space-y-8">
-            <Step
-              number={1}
-              title="開催予定を確認"
-              description={
-                <>
-                  <Link
-                    href="/schedule"
-                    className="text-accent-500 hover:text-accent-600 underline"
-                  >
-                    カレンダーから開催日を確認
-                  </Link>
-                  <span className="block text-sm text-gray-500 mt-1">
-                    土日を中心に、平日ナイターでも開催しています
-                  </span>
-                </>
-              }
-            />
-            <Step
-              number={2}
-              title="開催場所を確認"
-              description={
-                <>
-                  <Link
-                    href="/locations"
-                    className="text-accent-500 hover:text-accent-600 underline"
-                  >
-                    活動場所の詳細をチェック
-                  </Link>
-                  <span className="block text-sm text-gray-500 mt-1">
-                    一宮市・稲沢市の人工芝コートを中心に活動しています
-                  </span>
-                </>
-              }
-            />
-            <Step
-              number={3}
-              title="フォームから申し込み"
-              description={
-                <>
-                  <Link
-                    href="/apply"
-                    className="text-accent-500 hover:text-accent-600 underline"
-                  >
-                    必要事項を入力して完了
-                  </Link>
-                  <span className="block text-sm text-gray-500 mt-1">
-                    初心者の方も気軽にご参加いただけます
-                  </span>
-                </>
-              }
-            />
+            <AnimateOnScroll
+              animation="animate-slide-in-right"
+              delay={200}
+            >
+              <Step
+                number={1}
+                title="開催予定を確認"
+                description={
+                  <>
+                    <Link
+                      href="/schedule"
+                      className="text-accent-500 hover:text-accent-600 underline"
+                    >
+                      カレンダーから開催日を確認
+                    </Link>
+                    <span className="block text-sm text-gray-500 mt-1">
+                      土日を中心に、平日ナイターでも開催しています
+                    </span>
+                  </>
+                }
+              />
+            </AnimateOnScroll>
+            <AnimateOnScroll
+              animation="animate-slide-in-right"
+              delay={400}
+            >
+              <Step
+                number={2}
+                title="開催場所を確認"
+                description={
+                  <>
+                    <Link
+                      href="/locations"
+                      className="text-accent-500 hover:text-accent-600 underline"
+                    >
+                      活動場所の詳細をチェック
+                    </Link>
+                    <span className="block text-sm text-gray-500 mt-1">
+                      一宮市・稲沢市の人工芝コートを中心に活動しています
+                    </span>
+                  </>
+                }
+              />
+            </AnimateOnScroll>
+            <AnimateOnScroll
+              animation="animate-slide-in-right"
+              delay={600}
+            >
+              <Step
+                number={3}
+                title="フォームから申し込み"
+                description={
+                  <>
+                    <Link
+                      href="/apply"
+                      className="text-accent-500 hover:text-accent-600 underline"
+                    >
+                      必要事項を入力して完了
+                    </Link>
+                    <span className="block text-sm text-gray-500 mt-1">
+                      初心者の方も気軽にご参加いただけます
+                    </span>
+                  </>
+                }
+              />
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
@@ -315,18 +434,35 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-tennis-court/90 to-primary-600/80" />
         </div>
         <div className="relative max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4 text-tennis-line drop-shadow-lg">
-            お気軽にお問い合わせください
-          </h2>
-          <p className="mb-8 text-tennis-line/90 drop-shadow-md">
-            ご不明な点があればお問い合わせください
-          </p>
-          <Link
-            href="/contact"
-            className="inline-block bg-accent-500 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-accent-600 transition-colors"
+          <AnimateOnScroll
+            animation="animate-scale-up"
+            margin="0px"
           >
-            お問い合わせ
-          </Link>
+            <h2 className="text-3xl font-bold mb-4 text-tennis-line drop-shadow-lg">
+              お気軽にお問い合わせください
+            </h2>
+          </AnimateOnScroll>
+          <AnimateOnScroll
+            animation="animate-scale-up"
+            delay={200}
+            margin="0px"
+          >
+            <p className="mb-8 text-tennis-line/90 drop-shadow-md">
+              ご不明な点があればお問い合わせください
+            </p>
+          </AnimateOnScroll>
+          <AnimateOnScroll
+            animation="animate-scale-up"
+            delay={400}
+            margin="0px"
+          >
+            <Link
+              href="/contact"
+              className="inline-block bg-accent-500 text-white px-8 py-4 rounded-xl font-bold shadow-lg hover:bg-accent-600 transition-colors"
+            >
+              お問い合わせ
+            </Link>
+          </AnimateOnScroll>
         </div>
       </section>
     </main>
