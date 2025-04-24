@@ -4,17 +4,32 @@
 
 @import "react-big-calendar/lib/css/react-big-calendar.css";
 
+/* Google Fonts の読み込み */
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap");
+
 @layer base {
   html {
     @apply antialiased;
+    font-family: "M PLUS Rounded 1c", sans-serif;
   }
 
   body {
     @apply bg-gray-50;
   }
 
+  /* タイトル用フォント設定 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    @apply tracking-tight;
+  }
+
   h1 {
-    @apply text-4xl font-bold;
+    @apply text-4xl font-black;
   }
 
   h2 {
@@ -37,7 +52,8 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-base font-medium shadow-sm transition-all duration-200;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    @apply inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-base font-bold shadow-sm transition-all duration-200;
   }
 
   .btn-primary {
@@ -65,10 +81,22 @@
   }
 
   .nav-link {
-    @apply text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium;
+    font-family: "Zen Kaku Gothic New", sans-serif;
+    @apply text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-bold;
   }
 
   .nav-link-active {
-    @apply text-primary-600 font-semibold;
+    @apply text-primary-600;
+  }
+}
+
+/* フォント関連のユーティリティクラス */
+@layer utilities {
+  .font-title {
+    font-family: "Zen Kaku Gothic New", sans-serif;
+  }
+
+  .font-body {
+    font-family: "M PLUS Rounded 1c", sans-serif;
   }
 }
